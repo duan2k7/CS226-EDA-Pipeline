@@ -1,0 +1,29 @@
+==========================================================
+          BAO CAO TONG HOP EDA AUTOMATION PIPELINE        
+          Du an: Counter8Bit_Demo                         
+          Thoi gian tao: Tue Nov 10 20:10:00 2026         
+==========================================================
+
+[1] KET QUA MO PHONG (SIMULATION):
+  - File log: logs/sim_20261110_200000.log
+  - So luong Warnings: 0
+  - So luong Errors  : 0
+  - Trang thai: [PASS] - Chay thanh cong 100%
+  - Testbench status: ALL 4 TESTCASES PASSED
+    + Reset check: PASS
+    + Count Up check: PASS (0 -> 5)
+    + Count Down check: PASS (5 -> 2)
+    + Disable check: PASS (hold at 2)
+
+[2] KET QUA TONG HOP (SYNTHESIS):
+  - File log: logs/synth_20261110_200500.log
+  - So luong Warnings: 0
+  - So luong Errors  : 0
+  - Trang thai: [PASS] - Tong hop thanh cong ra cong logic
+  - Thong ke tai nguyen vi mach (Cell Count):
+      Total Cells: 24
+      D-Flip-Flops: 8 ($_DFF_PN0_)
+      Multiplexers: 8 ($_MUX_)
+      Logic Gates: 16 (AND/NOT/XOR)
+      Netlist output: results/counter_synth.v
+==========================================================

@@ -1,0 +1,6 @@
+[INFO] Icarus Verilog Compiler version 12.0 (devel)
+Compiling: src/counter_8bit.v tb/counter_8bit_tb.v
+src/counter_8bit.v:18: syntax error
+src/counter_8bit.v:18: error: malformed statement or unexpected token near 'count'
+tb/counter_8bit_tb.v:15: error: Port 'clk' of module 'counter_8bit' type mismatch.
+Icarus Verilog compilation failed with 3 errors.

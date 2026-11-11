@@ -1,0 +1,38 @@
+==========================================================
+          BAO CAO TONG HOP EDA AUTOMATION PIPELINE        
+          Du an: Counter8Bit_Demo                          
+          Thoi gian tao: Wed Nov 11 05:02:14 PM +07 2026                          
+==========================================================
+
+[1] KET QUA MO PHONG (SIMULATION):
+  - File log: logs/sim_20261111_170047.log
+  - So luong Warnings: 0
+  - So luong Errors  : 0
+  - Trang thai: [PASS] - Chay thanh cong 100%
+
+[2] KET QUA TONG HOP (SYNTHESIS):
+  - File log: logs/synth_20261111_170047.log
+  - So luong Warnings: 0
+  - So luong Errors  : 0
+  - Thong ke tai nguyen vi mach (Cell Count):
+      
+      === counter_8bit ===
+      
+         Number of wires:                 26
+         Number of wire bits:             82
+         Number of public wires:           5
+         Number of public wire bits:      12
+         Number of ports:                  5
+         Number of port bits:             12
+         Number of memories:               0
+         Number of memory bits:            0
+         Number of processes:              0
+         Number of cells:                 63
+           $_AND_                         18
+           $_DFFE_PN0P_                    8
+           $_MUX_                          7
+           $_NOT_                          8
+           $_OR_                           8
+           $_XOR_                         14
+
+==========================================================

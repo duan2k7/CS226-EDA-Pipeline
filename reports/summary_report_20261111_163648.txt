@@ -1,0 +1,44 @@
+==========================================================
+          BAO CAO TONG HOP EDA AUTOMATION PIPELINE        
+          Du an: Counter8Bit_Demo                          
+          Thoi gian tao: Wed Nov 11 04:36:48 PM +07 2026                          
+==========================================================
+
+[1] KET QUA MO PHONG (SIMULATION):
+  - File log: logs/sim_syntax_error.log
+  - So luong Warnings: 0
+  - So luong Errors  : 4
+  - Trang thai: [FAIL] - Co loi xay ra trong mo phong!
+  - Danh sach dong loi phat hien:
+      3:src/counter_8bit.v:18: syntax error
+      4:src/counter_8bit.v:18: error: malformed statement or unexpected token near 'count'
+      5:tb/counter_8bit_tb.v:15: error: Port 'clk' of module 'counter_8bit' type mismatch.
+      6:Icarus Verilog compilation failed with 3 errors.
+
+[2] KET QUA TONG HOP (SYNTHESIS):
+  - File log: logs/synth_20261110_200500.log
+  - So luong Warnings: 0
+  - So luong Errors  : 0
+  - Thong ke tai nguyen vi mach (Cell Count):
+      === design hierarchy ===
+      
+         counter_8bit                      1
+      
+         Number of wires:                 18
+         Number of wire bits:             46
+         Number of public wires:           5
+         Number of public wire bits:      12
+         Number of memories:               0
+         Number of memory bits:            0
+         Number of processes:              0
+         Number of cells:                 24
+           $_ANDNOT_                       6
+           $_AND_                          4
+           $_DFF_PN0_                      8
+           $_MUX_                          8
+           $_NOT_                          2
+           $_XOR_                          8
+      
+      === end of design hierarchy ===
+
+==========================================================

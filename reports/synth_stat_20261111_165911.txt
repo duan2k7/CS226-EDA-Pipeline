@@ -1,0 +1,35 @@
+========================================================
+    THONG KE TAI NGUYEN MACH LOGIC: counter_8bit       
+    Thoi gian: Wed Nov 11 04:59:11 PM +07 2026                                  
+========================================================
+11. Printing statistics.
+
+=== counter_8bit ===
+
+   Number of wires:                 26
+   Number of wire bits:             82
+   Number of public wires:           5
+   Number of public wire bits:      12
+   Number of ports:                  5
+   Number of port bits:             12
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 63
+     $_AND_                         18
+     $_DFFE_PN0P_                    8
+     $_MUX_                          7
+     $_NOT_                          8
+     $_OR_                           8
+     $_XOR_                         14
+
+12. Executing Verilog backend.
+
+12.1. Executing BMUXMAP pass.
+
+12.2. Executing DEMUXMAP pass.
+Dumping module `\counter_8bit'.
+
+End of script. Logfile hash: 3232a00090, CPU: user 0.03s system 0.01s, MEM: 17.46 MB peak
+Yosys 0.52 (git sha1 fee39a3284c90249e1d9684cf6944ffbbcbb8f90)
+Time spent: 25% 13x opt_expr (0 sec), 18% 3x read_verilog (0 sec), ...

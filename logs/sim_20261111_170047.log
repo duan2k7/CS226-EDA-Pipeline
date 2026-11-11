@@ -1,0 +1,13 @@
+VCD info: dumpfile results/waves.vcd opened for output.
+--------------------------------------------------
+[TB] BAT DAU KIEM THU MODULE COUNTER_8BIT
+--------------------------------------------------
+[PASS] Reset thanh cong, count = 00
+[PASS] Count Up thanh cong, count =   5
+[PASS] Count Down thanh cong, count =   2
+[PASS] Disable thanh cong, count giu nguyen =   2
+--------------------------------------------------
+[SIMULATION] ALL TESTS COMPLETED SUCCESSFULLY
+[RESULT] TEST PASS - MODULE HOAT DONG DUNG THIET KE
+--------------------------------------------------
+tb/counter_8bit_tb.v:107: $finish called at 240000 (1ps)

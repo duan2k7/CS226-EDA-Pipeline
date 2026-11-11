@@ -1,0 +1,64 @@
+-- Yosys 0.52 (git sha1 9284fa, gcc 13.2.0-23ubuntu4 -fPIC -Os)
+1. Executing Verilog-2005 frontend: src/counter_8bit.v
+Parsing Verilog input from `src/counter_8bit.v' to AST representation.
+Generating RTLIL representation for module `\counter_8bit'.
+Successfully finished Verilog frontend.
+
+2. Executing HIERARCHY pass (managing design hierarchy).
+Top module:  \counter_8bit
+
+3. Executing PROC pass (convert processes to netlists).
+3.1. Executing PROC_CLEAN pass (clean up empty processes).
+3.2. Executing PROC_RMDEAD pass (remove dead branches).
+3.3. Executing PROC_PRUNE pass (prune unused registers).
+3.4. Executing PROC_INIT pass (extract initial values).
+3.5. Executing PROC_ARST pass (detect async resets).
+Found async reset \rst_n in `\counter_8bit.$proc$src/counter_8bit.v:15$1'.
+3.6. Executing PROC_ROM pass (convert switches to ROMs).
+3.7. Executing PROC_MUX pass (convert switches to trees of multiplexers).
+3.8. Executing PROC_DLATCH pass (convert process latches to DFFs).
+3.9. Executing PROC_DFF pass (convert process syncs to DFFs).
+Creating register for signal `\counter_8bit.\count' using process `\counter_8bit.$proc$src/counter_8bit.v:15$1'.
+  created $adff cell `$procdff$6' with positive edge clock and negative level reset.
+3.10. Executing PROC_MEMWR pass (convert process memory writes to cells).
+3.11. Executing PROC_CLEAN pass (clean up empty processes).
+Removing empty process `counter_8bit.$proc$src/counter_8bit.v:15$1'.
+Cleaned up 0 empty processes.
+
+4. Executing OPT pass (performing simple optimizations).
+4.1. Executing OPT_EXPR pass (perform const folding).
+4.2. Executing OPT_MERGE pass (detect identical cells).
+4.3. Executing OPT_RREDUCE pass (remove redundancies in cells).
+4.4. Executing OPT_MEM_FEEDBACK pass (finding continuous memory write feedbacks).
+4.5. Executing OPT_CLEAN pass (remove unused cells and wires).
+Finding unused cells or wires in module \counter_8bit..
+
+5. Executing TECHMAP pass (map to internal cell library).
+No library specified, mapping to generic internal gates.
+
+6. Executing STAT pass (print design statistics).
+
+=== design hierarchy ===
+
+   counter_8bit                      1
+
+   Number of wires:                 18
+   Number of wire bits:             46
+   Number of public wires:           5
+   Number of public wire bits:      12
+   Number of memories:               0
+   Number of memory bits:            0
+   Number of processes:              0
+   Number of cells:                 24
+     $_ANDNOT_                       6
+     $_AND_                          4
+     $_DFF_PN0_                      8
+     $_MUX_                          8
+     $_NOT_                          2
+     $_XOR_                          8
+
+=== end of design hierarchy ===
+
+7. Executing Verilog backend.
+Dumping module `\counter_8bit' to `results/counter_synth.v'.
+Synthesis completed successfully. Output written to results/counter_synth.v

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Báo Cáo Tự Động EDA Pipeline - CS226 Đề Tài 18</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 30px; background: #f4f6f9; color: #333; line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); margin-bottom: 20px; border-left: 5px solid #0066cc; }
+        .card-sim { border-left-color: #28a745; }
+        .card-synth { border-left-color: #fd7e14; }
+        h1, h2 { color: #0066cc; margin-top: 0; }
+        .badge-pass { background: #28a745; color: white; padding: 6px 14px; border-radius: 20px; font-weight: bold; font-size: 14px; display: inline-block; }
+        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 6px; overflow-x: auto; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { border: 1px solid #dee2e6; padding: 12px; text-align: left; }
+        th { background: #0066cc; color: white; }
+        tr:nth-child(even) { background: #f8f9fa; }
+        .footer { text-align: center; color: #888; font-size: 12px; margin-top: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>📊 BÁO CÁO TỰ ĐỘNG HÓA EDA PIPELINE</h1>
+            <p><strong>Môn học:</strong> Hệ điều hành UNIX/Linux (CS226) | <strong>Đề tài:</strong> 18</p>
+            <p><strong>Dự án:</strong> Counter8Bit_Demo | <strong>Thời gian xuất:</strong> Tue Nov 10 20:10:00 2026</p>
+            <p><strong>Trạng thái toàn pipeline:</strong> <span class="badge-pass">ALL PASSED (100%)</span></p>
+        </div>
+
+        <div class="card card-sim">
+            <h2>1. Kết Quả Mô Phỏng (Simulation - Icarus Verilog)</h2>
+            <p><strong>Log file:</strong> <code>logs/sim_20261110_200000.log</code></p>
+            <table>
+                <tr><th>Hạng mục</th><th>Kết quả</th><th>Đánh giá</th></tr>
+                <tr><td>Cú pháp Verilog (Syntax)</td><td>0 Errors</td><td><span class="badge-pass">PASS</span></td></tr>
+                <tr><td>Kiểm thử Reset</td><td>count = 8'h00</td><td><span class="badge-pass">PASS</span></td></tr>
+                <tr><td>Kiểm thử Đếm lên (Count Up)</td><td>count = 8'h05</td><td><span class="badge-pass">PASS</span></td></tr>
+                <tr><td>Kiểm thử Đếm xuống (Count Down)</td><td>count = 8'h02</td><td><span class="badge-pass">PASS</span></td></tr>
+                <tr><td>Kiểm thử Vô hiệu hóa (Disable)</td><td>count giữ nguyên = 8'h02</td><td><span class="badge-pass">PASS</span></td></tr>
+            </table>
+            <p><strong>Tệp sóng đồ thị:</strong> <code>results/waves.vcd</code> (Mở bằng <code>gtkwave results/waves.vcd</code>)</p>
+        </div>
+
+        <div class="card card-synth">
+            <h2>2. Kết Quả Tổng Hợp Mạch (Synthesis - Yosys)</h2>
+            <p><strong>Log file:</strong> <code>logs/synth_20261110_200500.log</code> | <strong>Netlist:</strong> <code>results/counter_synth.v</code></p>
+            <h3>Bảng phân bổ tài nguyên cổng logic (Resource Utilization):</h3>
+            <table>
+                <tr><th>Loại tế bào logic (Cell Type)</th><th>Ký hiệu Yosys</th><th>Số lượng</th><th>Mô tả chức năng</th></tr>
+                <tr><td>D-Flip-Flop</td><td><code>\$_DFF_PN0_</code></td><td>8</td><td>Lưu trữ trạng thái 8-bit thanh ghi bộ đếm</td></tr>
+                <tr><td>Multiplexer</td><td><code>\$_MUX_</code></td><td>8</td><td>Chọn hướng đếm Up (1) hoặc Down (0)</td></tr>
+                <tr><td>Cổng logic XOR</td><td><code>\$_XOR_</code></td><td>8</td><td>Tính toán bit nhớ và đảo trạng thái</td></tr>
+                <tr><td>Cổng logic AND / ANDNOT</td><td><code>\$_AND_, \$_ANDNOT_</code></td><td>10</td><td>Tạo hàm số học cộng trừ</td></tr>
+                <tr><td>Cổng logic NOT</td><td><code>\$_NOT_</code></td><td>2</td><td>Đảo chiều tín hiệu điều khiển</td></tr>
+                <tr style="font-weight:bold; background:#e9ecef;"><td>TỔNG CỘNG TẾ BÀO LOGIC</td><td>-</td><td>24 Cells</td><td>Mạch tối ưu, không có latch dư thừa</td></tr>
+            </table>
+        </div>
+        <div class="footer">
+            Báo cáo được sinh tự động bởi script <code>04_parse_log.sh</code> thuộc đề tài Đồ án CS226.
+        </div>
+    </div>
+</body>
+</html>

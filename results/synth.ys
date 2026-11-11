@@ -1,0 +1,13 @@
+# Yosys synthesis script for counter_8bit
+read_verilog src/counter_8bit.v
+hierarchy -check -top counter_8bit
+proc
+opt
+fsm
+opt
+memory
+opt
+techmap
+opt
+stat
+write_verilog results/counter_synth.v
