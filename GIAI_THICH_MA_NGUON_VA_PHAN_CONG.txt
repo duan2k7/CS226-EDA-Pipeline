@@ -1,0 +1,230 @@
+================================================================================
+                    HỆ THỐNG TỰ ĐỘNG HÓA EDA PIPELINE TRÊN LINUX
+         TÀI LIỆU GIẢI THÍCH MÃ NGUỒN VÀ PHÂN CÔNG NHIỆM VỤ NHÓM 04
+================================================================================
+Môn học: Hệ điều hành UNIX/Linux (Mã môn: CS226)
+Giảng viên hướng dẫn: Th.S Trần Hữu Minh Đăng
+Lớp: CS 226 C
+Nhóm sinh viên thực hiện: Nhóm 04 (5 thành viên phụ trách 6 Module)
+Tên đề tài: ĐỀ TÀI 18 - TỰ ĐỘNG HÓA QUY TRÌNH MÔ PHỎNG VÀ TỔNG HỢP MẠCH SỐ
+                       TRÊN LINUX BẰNG SHELL SCRIPT
+================================================================================
+
+--------------------------------------------------------------------------------
+PHẦN 1. BẢN CHẤT MÃ NGUỒN NÀY DÙNG ĐỂ LÀM GÌ?
+--------------------------------------------------------------------------------
+1. Bối cảnh:
+   Trong ngành thiết kế vi mạch (IC Design / FPGA), các kỹ sư làm việc hoàn toàn
+   trên Linux và viết code mô tả phần cứng bằng ngôn ngữ Verilog HDL.
+   Sau khi viết code một con chip (ví dụ: bộ đếm 8-bit counter_8bit), người kỹ
+   sư bắt buộc phải trải qua 3 khâu kiểm tra:
+     - Khâu 1 (Mô phỏng - Simulation): Chạy giả lập trên phần mềm xem mạch tính
+       toán đúng hay sai, vẽ sóng tín hiệu điện.
+     - Khâu 2 (Tổng hợp - Synthesis): Dịch code Verilog thành các linh kiện bán
+       dẫn thật (cổng AND, OR, Flip-Flop, MUX...).
+     - Khâu 3 (Đọc Log & Báo cáo): Đọc file nhật ký dài hàng nghìn dòng xem có
+       bị lỗi cú pháp không, mạch tiêu tốn bao nhiêu cổng logic.
+
+2. Nỗi khổ nếu làm thủ công:
+   Nếu gõ lệnh bằng tay, mỗi lần sửa một dòng code, kỹ sư phải mở Terminal và gõ
+   hàng chục lệnh dài dòng lặp đi lặp lại. Một ngày chạy 30-50 lần rất dễ gõ nhầm
+   và cực kỳ mất thời gian.
+
+3. Giải pháp của bộ mã nguồn này:
+   Nhóm mình đã viết một hệ sinh thái các file Bash Shell Script (.sh) để biến
+   toàn bộ quy trình thủ công phức tạp thành MỘT CÂU LỆNH DUY NHẤT:
+       ./eda_pipeline.sh --all
+   Chỉ mất đúng 0.2 giây (173 ms), máy tính sẽ tự động chạy toàn bộ dây chuyền từ
+   kiểm tra file -> mô phỏng -> tổng hợp -> bóc tách log -> in ra báo cáo tóm tắt
+   hoàn chỉnh (cả dạng Text xem trên Terminal và dạng Web HTML trực quan).
+
+--------------------------------------------------------------------------------
+PHẦN 2. MÃ NGUỒN NÀY HOẠT ĐỘNG NHƯ THẾ NÀO? (LUỒNG DỮ LIỆU TỪ A ĐẾN Z)
+--------------------------------------------------------------------------------
+Toàn bộ dự án được tổ chức theo dây chuyền khép kín (EDA Pipeline):
+
+[Bước 1] Khởi tạo môi trường & phân quyền (File: scripts/01_setup_project.sh)
+   - Đọc file cấu hình config/eda.conf để lấy tên dự án, tên module vi mạch.
+   - Tự động dùng lệnh 'mkdir -p' tạo chuẩn 6 thư mục chức năng:
+       + src/     : Chứa code Verilog của mạch (counter_8bit.v)
+       + tb/      : Chứa testbench kiểm thử (counter_8bit_tb.v)
+       + config/  : Chứa file cấu hình tham số eda.conf
+       + scripts/ : Chứa các script thực thi con
+       + logs/    : Chứa lịch sử file nhật ký chạy
+       + reports/ : Chứa báo cáo tóm tắt (Text và HTML)
+       + results/ : Chứa file sóng .vcd và file Netlist mạch sau tổng hợp
+   - Dùng lệnh 'chmod 755' tự động cấp quyền thực thi cho tất cả script.
+
+[Bước 2] Chạy mô phỏng mạch số (File: scripts/02_run_sim.sh)
+   - Kiểm tra xem file src/counter_8bit.v và tb/counter_8bit_tb.v có tồn tại không.
+   - Gọi bộ công cụ Icarus Verilog để biên dịch:
+         iverilog -o results/sim.out src/counter_8bit.v tb/counter_8bit_tb.v
+   - Chạy mô phỏng bằng công cụ vvp:
+         vvp results/sim.out
+   - Xuất dữ liệu biểu đồ sóng điện tử ra file results/waves.vcd.
+   - Ghi lại toàn bộ tiến trình vào file logs/sim_TIMESTAMP.log.
+
+[Bước 3] Tổng hợp mạch logic (File: scripts/03_run_synth.sh)
+   - Tự động tạo script tổng hợp Yosys (results/synth.ys).
+   - Gọi bộ công cụ Yosys Open SYnthesis Suite:
+         yosys -s results/synth.ys
+   - Chuyển đổi mã Verilog thành Netlist cổng logic thực tế: results/counter_synth.v.
+   - Đếm tài nguyên vi mạch (Cell Count): thống kê mạch tốn bao nhiêu cổng AND,
+     XOR, MUX, D-FlipFlop.
+   - Lưu toàn bộ kết quả vào logs/synth_TIMESTAMP.log và reports/synth_stat_TIMESTAMP.txt.
+
+[Bước 4] Phân tích Log & Tạo báo cáo tự động (File: scripts/04_parse_log.sh)
+   - Sử dụng các lệnh UNIX kinh điển (grep, awk, sed, wc) để tự động quét log:
+       + grep -i -E "(error|fail)" : Tìm và đếm số lỗi cú pháp, lỗi logic.
+       + grep -i -E "(warning|warn)": Tìm và đếm số lượng cảnh báo.
+       + awk: Bóc tách chính xác khối thống kê 63 cổng logic từ log của Yosys.
+   - Xuất ra 2 bản báo cáo đồng thời:
+       + Bản Text: reports/summary_report_TIMESTAMP.txt (xem ngay trên Terminal).
+       + Bản Web: reports/summary_report_TIMESTAMP.html (mở bằng trình duyệt).
+
+[Bước 5] Điều phối trung tâm Master Pipeline (File: eda_pipeline.sh)
+   - Là "bộ não" chỉ huy, kết nối Bước 1 -> Bước 2 -> Bước 3 -> Bước 4.
+   - Hỗ trợ cả 2 chế độ:
+       + Chế độ tham số dòng lệnh CLI: --all, --setup, --sim, --synth, --report, --clean.
+       + Chế độ Menu số tương tác: gõ ./eda_pipeline.sh để chọn từng bước bằng menu.
+
+--------------------------------------------------------------------------------
+PHẦN 3. PHÂN CÔNG NHIỆM VỤ CHI TIẾT TỪNG THÀNH VIÊN
+--------------------------------------------------------------------------------
+
+================================================================================
+1. THÀNH VIÊN 1: TRẦN HUY LÂM
+================================================================================
+- Module phụ trách: Module 1.0 - Tổng quan về tự động hóa trên Linux và vai trò
+  của Shell Script trong thiết kế vi mạch.
+- Vị trí trong Báo cáo Word: Chương 1 (Toàn bộ) và Mục 3.1.1 (Trang 1 - 16, 42 - 46).
+- File Slide thuyết trình: 2026S_CS226_TranHuyLam_Nhom04_DT18-1.pptx.
+- Nhiệm vụ cụ thể:
+    + Nghiên cứu cơ sở lý thuyết: Tự động hóa là gì? Tại sao ngành vi mạch toàn cầu
+      lại chọn Linux mà không dùng Windows?
+    + Thực hiện Kịch bản thực nghiệm 1: Làm bài đo thực nghiệm đối chứng giữa
+      thao tác gõ lệnh thủ công vs dùng Shell Script (chạy 10 lần đo thời gian).
+- Số liệu quan trọng cần nhớ khi thầy hỏi:
+    + Làm thủ công: Mất trung bình 452 giây (~7.5 phút), xuất hiện 2.7 lỗi gõ nhầm/lần.
+    + Dùng Shell Script: Chỉ mất 2.11 giây, 0 lỗi sai.
+    + Tốc độ tăng tốc: Nhanh hơn 214.2 lần (hơn 21,400%), độ chính xác đạt 100%!
+
+================================================================================
+2. THÀNH VIÊN 2: NGUYỄN NGỌC HUY
+================================================================================
+- Module phụ trách: Module 2.0 - Tổ chức môi trường Linux, cấu trúc dự án và
+  chuẩn bị mã nguồn Verilog đầu vào.
+- File mã nguồn phụ trách: scripts/01_setup_project.sh, src/counter_8bit.v.
+- Vị trí trong Báo cáo Word: Mục 2.1.1 và Mục 3.1.2 (Trang 17 - 22, 47 - 50).
+- File Slide thuyết trình: 2026S_CS226_NguyenNgocHuy_Nhom04_DT18-2.pptx.
+- Nhiệm vụ cụ thể:
+    + Chuẩn hóa cấu trúc cây thư mục EDA chuẩn công nghiệp gồm 6 thư mục chức năng:
+      src/, tb/, config/, scripts/, logs/, reports/, results/.
+    + Viết script tự động tạo thư mục bằng 'mkdir -p' và cấp quyền file bằng 'chmod 755'.
+    + Chuẩn bị mã nguồn mạch đếm 8-bit counter_8bit.v (gồm tín hiệu xung clk,
+      reset bất đồng bộ rst_n, cho phép enable, đếm lên/xuống up_down).
+- Câu hỏi thầy hay hỏi:
+    + "Tại sao phải tách riêng thư mục src/ và tb/?"
+      -> Trả lời: Vì thư mục tb/ chứa testbench mô phỏng có lệnh trễ thời gian (#10)
+         không thể tổng hợp thành linh kiện thật được. Nếu để chung, khâu tổng hợp
+         của Yosys sẽ bị báo lỗi ngay lập tức.
+
+================================================================================
+3. THÀNH VIÊN 3: TRẦN TRUNG THÔNG
+================================================================================
+- Module phụ trách: Module 3.0 - Viết Shell Script cho bước mô phỏng mạch số.
+- File mã nguồn phụ trách: scripts/02_run_sim.sh, tb/counter_8bit_tb.v.
+- Vị trí trong Báo cáo Word: Mục 2.1.2 và Mục 3.1.3 (Trang 23 - 28, 51 - 54).
+- File Slide thuyết trình: 2026S_CS226_TranTrungThong_Nhom04_DT18-3.pptx.
+- Nhiệm vụ cụ thể:
+    + Nghiên cứu công cụ mô phỏng Icarus Verilog (iverilog và vvp).
+    + Viết kịch bản scripts/02_run_sim.sh để tự động:
+        1. Kiểm tra sự tồn tại của file code và testbench.
+        2. Biên dịch mã nguồn Verilog thành file binary results/sim.out.
+        3. Chạy mô phỏng bằng 'vvp' và xuất file sóng results/waves.vcd.
+        4. Bắt mã trạng thái thoát ($?) để thông báo PASS hoặc FAIL.
+- Câu hỏi thầy hay hỏi:
+    + "File sóng .vcd dùng để làm gì và xem bằng cách nào?"
+      -> Trả lời: File .vcd (Value Change Dump) lưu trữ toàn bộ sự biến thiên mức
+         logic (0 và 1) theo thời gian. Kỹ sư dùng phần mềm GTKWave để mở file này
+         và xem biểu đồ sóng trực quan (lệnh: gtkwave results/waves.vcd).
+
+================================================================================
+4. THÀNH VIÊN 4: NGUYỄN PHÚC HƯNG
+================================================================================
+- Module phụ trách: Module 4.0 - Viết Shell Script cho bước tổng hợp vi mạch và lưu kết quả.
+- File mã nguồn phụ trách: scripts/03_run_synth.sh.
+- Vị trí trong Báo cáo Word: Mục 2.1.3 và Mục 3.1.4 (Trang 29 - 34, 55 - 58).
+- File Slide thuyết trình: 2026S_CS226_NguyenPhucHung_Nhom04_DT18-4.pptx.
+- Nhiệm vụ cụ thể:
+    + Nghiên cứu công cụ tổng hợp vi mạch mã nguồn mở chuẩn công nghiệp Yosys.
+    + Viết script tự động sinh file lệnh synth.ys và gọi Yosys tổng hợp mạch logic.
+    + Lưu kết quả thành file Netlist cổng logic (results/counter_synth.v).
+    + Xuất báo cáo thống kê tế bào vi mạch (Cell Count): Mạch counter_8bit tốn 63
+      linh kiện logic (18 cổng AND, 8 D-FlipFlop, 7 MUX, 8 NOT, 8 OR, 14 XOR).
+    + Tự động gắn nhãn thời gian timestamp (YYYYMMDD_HHMMSS) để phân biệt kết quả
+      tổng hợp giữa các lần chạy khác nhau.
+- Câu hỏi thầy hay hỏi:
+    + "Khâu tổng hợp (Synthesis) khác gì so với mô phỏng (Simulation)?"
+      -> Trả lời: Mô phỏng chỉ kiểm tra tính đúng đắn về thuật toán trên phần mềm.
+         Còn tổng hợp là bước biến đổi mã lệnh trừu tượng thành các cổng logic điện
+         tử cụ thể để nạp lên chip FPGA hoặc gửi đi nhà máy đúc chip (Fab).
+
+================================================================================
+5. THÀNH VIÊN 5 & 6: LÊ VĂN DUẨN (Nhóm trưởng)
+================================================================================
+- Module phụ trách:
+    + Module 5.0: Phân tích log, kiểm tra lỗi và tạo báo cáo kết quả tự động.
+    + Module 6.0: Hoàn thiện Master Pipeline Script, đóng gói và viết tài liệu bàn giao.
+- File mã nguồn phụ trách: scripts/04_parse_log.sh, eda_pipeline.sh, install_dependencies.sh.
+- Vị trí trong Báo cáo Word: Mục 2.1.4, 3.1.5, 3.1.6 (Trang 35 - 41, 59 - 65).
+- File Slide thuyết trình: 2026S_CS226_LeVanDuan_Nhom04_DT18-5.pptx.
+- Nhiệm vụ cụ thể:
+    + Dùng các lệnh UNIX mạnh mẽ (grep, awk, sed, wc) để tự động bóc tách nhật ký:
+      đếm số lỗi Errors, Warnings, tóm đúng dòng bị lỗi cú pháp trong code Verilog.
+    + Tự động xuất báo cáo kép: Text file cho Terminal và HTML file cho trình duyệt.
+    + Viết script điều phối trung tâm eda_pipeline.sh kết nối trơn tru toàn bộ 4 script
+      con của nhóm thành một khối thống nhất.
+    + Thiết kế menu tương tác TUI và hỗ trợ các cờ lệnh (--all, --setup, --sim, --synth, --report, --clean).
+    + Viết User Guide (README.md), tạo kịch bản cài đặt tự động (install_dependencies.sh)
+      giúp bất kỳ ai cũng có thể triển khai lại sản phẩm trên máy mới chỉ trong 1 phút.
+
+--------------------------------------------------------------------------------
+PHẦN 4. HƯỚNG DẪN THỰC HÀNH CHẠY THỬ TRÊN MÁY TÍNH
+--------------------------------------------------------------------------------
+Để tự chạy thử trên máy Linux hoặc máy ảo Ubuntu, mọi người chỉ cần gõ 3 bước:
+
+Bước 1: Mở Terminal và di chuyển vào thư mục dự án
+    cd 2026S_CS226_Nhom04_DT18
+
+Bước 2: Cài đặt các công cụ bổ trợ (chỉ chạy 1 lần)
+    sudo apt update && sudo apt install -y iverilog yosys gtkwave
+
+Bước 3: Chạy thử các chế độ
+    - Chạy tự động trọn gói từ A đến Z:
+        ./eda_pipeline.sh --all
+
+    - Chạy ở chế độ Menu số trực quan:
+        ./eda_pipeline.sh
+
+    - Xem biểu đồ sóng tín hiệu dạng số:
+        gtkwave results/waves.vcd
+
+    - Xem báo cáo giao diện Web HTML:
+        xdg-open reports/summary_report_*.html
+
+    - Dọn dẹp các file rác và log cũ:
+        ./eda_pipeline.sh --clean
+
+--------------------------------------------------------------------------------
+PHẦN 5. CHECKLIST CÔNG VIỆC TRƯỚC KHI NỘP BÀI
+--------------------------------------------------------------------------------
+[ ] 1. Mọi người gửi Mã số sinh viên (MSSV) cho Duẩn để điền vào trang bìa & bảng
+       thông tin nhóm trong file Báo cáo Word.
+[ ] 2. Mỗi bạn mở file Slide_Thuyet_Trinh_Tung_Thanh_Vien.md, copy phần dàn ý slide
+       của mình dán vào PowerPoint để hoàn thành file slide cá nhân (.pptx).
+[ ] 3. Đọc kỹ phần việc của mình trong tài liệu này (mục 3) để tự tin trả lời vấn đáp!
+
+================================================================================
+                    CHÚC NHÓM 04 ĐẠT ĐIỂM TỐI ĐA (A/A+)!
+================================================================================
